@@ -15,7 +15,7 @@ BingoGame::BingoGame() {
 }
 
 BingoGame::~BingoGame() {
-// STUB
+    delete _caller;
 }
 
 BingoTypes::gameType BingoGame::getGameType() {
@@ -61,7 +61,7 @@ void BingoGame::resetVictoryType(BingoTypes::victoryType victory) {
 }
 
 void BingoGame::completeNextCall(std::ostream& out) {
-// STUB
+    _caller->callNextNumber(out);
 }
 
 void BingoGame::takeAction(std::ostream& out, std::istream& in, std::string id,
@@ -168,14 +168,14 @@ void BingoGame::showGameMove(std::ostream& out, std::istream& in,
 }
 
 
-void BingoGame::showBoardMove(std::ostream& out, std::istream& in,
-                              std::string id) {
-// STUB
+void BingoGame::showBoardMove(std::ostream& out, std::istream& in, std::string id) {
+    ScreenDisplay screen;
+    screen.displayBingoBoard(out, _player, _caller);
 }
 
-void BingoGame::helpMove(std::ostream& out, std::istream& in,
-                         std::string id) {
-// STUB
+void BingoGame::helpMove(std::ostream& out, std::istream& in, std::string id) {
+    ScreenDisplay screen;
+    screen.displayHelp(out);
 }
 
 void BingoGame::quitGameMove(std::ostream& out, std::istream& in,
@@ -219,14 +219,23 @@ bool BingoGame::joinGame(std::string id, BingoCard* card) {
 }
 
 bool BingoGame::leaveGame(std::string id) {
-// STUB
+    auto it = _player.find(id);
+    if (it != _player.end()) {
+        _player.erase(it);
+        return true;
+    }
     return false;
-  }
+}
 
 void BingoGame::endGame(std::ostream& out) {
-// STUB
+    ScreenDisplay screen;
+    screen.displayGameInfo(out, _caller);
+    screen.displayWinners(out, _winners);
+    screen.displayCallerMessage(out, "Game has ended.\n");
 }
 
 void BingoGame::resetGame() {
-// STUB
+    _caller->reset();
+    _winners.clear();
+    _player.clear();
 }

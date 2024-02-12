@@ -43,12 +43,17 @@ IntSquare::IntSquare(unsigned value) : Square{value} {
 IntSquare::~IntSquare() {}
 
 bool IntSquare::daubSquare(unsigned numberCalled) {
-// STUB
-  return false;
+    if (_value == numberCalled) {
+        _daubed->daub(); 
+        return true; // Square successfully daubed
+    }
+    return false; // Square not daubed
 }
 
 void IntSquare::shouldDaubSquare(unsigned numberCalled) {
-// STUB
+    if (_value == numberCalled) {
+        _daubed->setShouldDaub(true); // Set should daub flag to true
+    }
 }
 
 void IntSquare::resetSquare() {

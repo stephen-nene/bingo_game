@@ -330,10 +330,10 @@ void ScreenDisplay::drawHorizontalBorder(std::ostream& out,
 }
 
 void ScreenDisplay::drawBingoCardTop(std::ostream& out, unsigned colWidth) {
-    // Draw the top border of the bingo card
-    out << '+' << std::setfill('-');
+    out << '+';
     for (unsigned i = 0; i < 5; ++i) {
-        out << std::setw(colWidth + 1) << std::right << '+';
+        out << std::setfill('-') << std::setw(colWidth + 1) << std::right << '+';
     }
-    out << std::setfill(' ') << '\n';
+    out << std::setfill(' ');
 }
+

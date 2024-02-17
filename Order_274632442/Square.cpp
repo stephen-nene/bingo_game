@@ -44,15 +44,15 @@ IntSquare::~IntSquare() {}
 
 bool IntSquare::daubSquare(unsigned numberCalled) {
     if (_value == numberCalled) {
-        _daubed->daub(); 
-        return true; // Square successfully daubed
+        _daubed = new GoodDaub();
+        return true;
     }
-    return false; // Square not daubed
+    return false;
 }
 
 void IntSquare::shouldDaubSquare(unsigned numberCalled) {
     if (_value == numberCalled) {
-        _daubed->setShouldDaub(true); // Set should daub flag to true
+        _daubed->daub();
     }
 }
 

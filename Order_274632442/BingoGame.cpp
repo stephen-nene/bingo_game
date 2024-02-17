@@ -15,7 +15,10 @@ BingoGame::BingoGame() {
 }
 
 BingoGame::~BingoGame() {
-    delete _caller;
+    for (auto& player : _player) {
+        delete player.second;
+    }
+    _player.clear();
 }
 
 BingoTypes::gameType BingoGame::getGameType() {
@@ -60,8 +63,32 @@ void BingoGame::resetVictoryType(BingoTypes::victoryType victory) {
   _caller->setVictoryType(victory);
 }
 
+
 void BingoGame::completeNextCall(std::ostream& out) {
-    _caller->callNextNumber(out);
+    if (_caller == nullptr) {
+        throw incomplete_settings("The caller hasn't been set.");
+    }
+
+    if (_player.empty()) {
+        throw invalid_size("There are no players before the first turn.");
+    }
+
+    bool bingoCalled = false;
+    for (auto& player : _player) {
+        out << "Player: " << player.first << std::endl;
+        _caller->pullBall();
+        out << "Announcement: " << _caller->getAnnouncement() << std::endl;
+        player.second->daubNumber(_caller->getCurrentNumber());
+
+        if (player.second->isWinner()) {
+            _winners.push_back(player.first);
+            bingoCalled = true;
+        }
+    }
+
+    if (bingoCalled || _player.size() == 0) {
+        endGame(out);
+    }
 }
 
 void BingoGame::takeAction(std::ostream& out, std::istream& in, std::string id,
@@ -169,13 +196,26 @@ void BingoGame::showGameMove(std::ostream& out, std::istream& in,
 
 
 void BingoGame::showBoardMove(std::ostream& out, std::istream& in, std::string id) {
-    ScreenDisplay screen;
-    screen.displayBingoBoard(out, _player, _caller);
+    // Get the player's bingo card and display it
+    auto it = _player.find(id);
+    if (it != _player.end()) {
+        BingoCard* card = it->second;
+        ScreenDisplay::displayCard(out, card);
+    } else {
+        throw invalid_identifier("Player ID not found.");
+    }
 }
 
 void BingoGame::helpMove(std::ostream& out, std::istream& in, std::string id) {
-    ScreenDisplay screen;
-    screen.displayHelp(out);
+    // Display help instructions to the player
+    out << "Welcome to Bingo Game Help!" << std::endl;
+    out << "----------------------------------------------" << std::endl;
+    out << "Here are some helpful instructions:" << std::endl;
+    out << "- To mark a number on your card, enter 'D' followed by the number (e.g., D23)." << std::endl;
+    out << "- To check if you have a winning pattern, enter 'B' to call Bingo." << std::endl;
+    out << "- To display your bingo card, enter 'S'." << std::endl;
+    out << "- To quit the game, enter 'Q'." << std::endl;
+    out << "----------------------------------------------" << std::endl;
 }
 
 void BingoGame::quitGameMove(std::ostream& out, std::istream& in,
@@ -221,6 +261,7 @@ bool BingoGame::joinGame(std::string id, BingoCard* card) {
 bool BingoGame::leaveGame(std::string id) {
     auto it = _player.find(id);
     if (it != _player.end()) {
+        delete it->second;
         _player.erase(it);
         return true;
     }
@@ -228,14 +269,30 @@ bool BingoGame::leaveGame(std::string id) {
 }
 
 void BingoGame::endGame(std::ostream& out) {
-    ScreenDisplay screen;
-    screen.displayGameInfo(out, _caller);
-    screen.displayWinners(out, _winners);
-    screen.displayCallerMessage(out, "Game has ended.\n");
+    if (!_caller) {
+        throw incomplete_settings("Caller not set.");
+    }
+
+    // Check for winners
+    for (auto& pair : _player) {
+        BingoCard* card = pair.second;
+        if (card->checkForWin(_caller->getVictoryType())) {
+            _winners.push_back(pair.first);
+        }
+    }
+
+    // If there are winners or no more players, end the game
+    if (!_winners.empty() || _player.empty()) {
+        ScreenDisplay::displayWinners(out, _winners);
+        // Reset the game after ending
+        resetGame();
+    }
 }
 
 void BingoGame::resetGame() {
-    _caller->reset();
     _winners.clear();
+    for (auto& pair : _player) {
+        delete pair.second;
+    }
     _player.clear();
 }

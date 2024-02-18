@@ -111,15 +111,15 @@ void BingoCaller::resetGame() {
 }
 
 
-Bingo50Caller::Bingo50Caller(std::string cluesFile, BingoTypes::victoryType victory){
-// Fill _ballCage with all valid balls for BINGO5 0
-for (unsigned i = 1; i <= 50; ++i) {
-  _ballCage.push_back(i);
-}
-_game = BingoTypes::BINGO50;
-_description = "Bingo 50";
-readClues(cluesFile);
-
+Bingo50Caller::Bingo50Caller(std::string cluesFile, BingoTypes::victoryType victory)
+    : BingoCaller(victory) {
+    // Fill _ballCage with all valid balls for BINGO50
+    for (unsigned i = 1; i <= 50; ++i) {
+        _ballCage.push_back(i);
+    }
+    _game = BingoTypes::BINGO50;
+    _description = "Bingo 50";
+    readClues(cluesFile);
 }
 
 
